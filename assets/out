@@ -19,6 +19,7 @@ payload=`cat`
 bucket=$(echo "$payload" | jq -r '.source.bucket')
 path=$(echo "$payload" | jq -r '.source.path // ""')
 options=$(echo "$payload" | jq -r '.source.options // [] | join(" ")')
+dir=$(echo "$payload" | jq -r '.params.dir // "."')
 
 # export for `aws` cli
 AWS_ACCESS_KEY_ID=$(echo "$payload" | jq -r '.source.access_key_id // empty')
@@ -34,8 +35,9 @@ fi
 # Export AWS_DEFAULT_REGION if set
 [ -n "$AWS_DEFAULT_REGION" ] && export AWS_DEFAULT_REGION
 
-echo "Uploading to S3..."
-eval aws s3 sync $source "s3://$bucket/$path" $options
+cd "$source/$dir"
+echo "Uploading to S3 from '$dir'..."
+eval aws s3 sync $source/$dir "s3://$bucket/$path" $options
 echo "...done."
 
 source "$(dirname $0)/emit.sh" >&3

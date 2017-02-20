@@ -33,6 +33,16 @@ jobs:
 
 The `access_key_id` and `secret_access_key` are optional and if not provided the EC2 Metadata service will be queried for role based credentials.
 
+## Params
+
+Parameters for setting up the `aws s3 sync` command include:
+
+```
+- put: push-to-s3
+  params:
+    dir: subdirectory # will change the working directory to subdirectory before invoking the sync
+```
+
 ## Options
 
 The `options` parameter is synonymous with the options that `aws cli` accepts for `sync`. Please see [S3 Sync Options](http://docs.aws.amazon.com/cli/latest/reference/s3/sync.html#options) and pay special attention to the [Use of Exclude and Include Filters](http://docs.aws.amazon.com/cli/latest/reference/s3/index.html#use-of-exclude-and-include-filters).
