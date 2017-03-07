@@ -10,8 +10,8 @@ bucket=$(echo "$payload" | jq -r '.source.bucket')
 prefix="$(echo "$payload" | jq -r '.source.path // ""')"
 
 # export for `aws` cli
-AWS_ACCESS_KEY_ID=$(echo "$payload" | jq -r '.source.access_key_id')
-AWS_SECRET_ACCESS_KEY=$(echo "$payload" | jq -r '.source.secret_access_key')
+AWS_ACCESS_KEY_ID=$(echo "$payload" | jq -r '.source.access_key_id // ""')
+AWS_SECRET_ACCESS_KEY=$(echo "$payload" | jq -r '.source.secret_access_key // ""')
 
 # Due to precedence rules, must be unset to support AWS IAM Roles.
 if [ -n "$AWS_ACCESS_KEY_ID" ] && [ -n "$AWS_SECRET_ACCESS_KEY" ]; then
