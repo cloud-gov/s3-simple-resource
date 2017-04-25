@@ -21,14 +21,14 @@ path=$(echo "$payload" | jq -r '.source.path // ""')
 options=$(echo "$payload" | jq -r '.source.options // [] | join(" ")')
 
 # export for `aws` cli
-AWS_ACCESS_KEY_ID=$(echo "$payload" | jq -r '.source.access_key_id // empty')
-AWS_SECRET_ACCESS_KEY=$(echo "$payload" | jq -r '.source.secret_access_key // empty')
-AWS_DEFAULT_REGION=$(echo "$payload" | jq -r '.source.region // empty')
+export AWS_ACCESS_KEY_ID=$(echo "$payload" | jq -r '.source.access_key_id // empty')
+export AWS_SECRET_ACCESS_KEY=$(echo "$payload" | jq -r '.source.secret_access_key // empty')
+export AWS_DEFAULT_REGION=$(echo "$payload" | jq -r '.source.region // empty')
 
 # Due to precedence rules, must be unset to support AWS IAM Roles.
 if [ -n "$AWS_ACCESS_KEY_ID" ] && [ -n "$AWS_SECRET_ACCESS_KEY" ]; then
-  export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-  export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+  unset AWS_ACCESS_KEY_ID
+  unset AWS_SECRET_ACCESS_KEY
 fi
 
 # Export AWS_DEFAULT_REGION if set
