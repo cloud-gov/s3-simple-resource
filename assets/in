@@ -20,12 +20,6 @@ bucket=$(echo "$payload" | jq -r '.source.bucket')
 path=$(echo "$payload" | jq -r '.source.path // ""')
 options=$(echo "$payload" | jq -r '.source.options // [] | join(" ")')
 
-# quit if upload only
-if [ $(echo "$payload" | jq -r '.source.upload_only') = true ]; then
-    echo "Skipping download..."
-    exit 0
-fi
-
 # export for `aws` cli
 AWS_ACCESS_KEY_ID=$(echo "$payload" | jq -r '.source.access_key_id // empty')
 AWS_SECRET_ACCESS_KEY=$(echo "$payload" | jq -r '.source.secret_access_key // empty')
@@ -40,8 +34,13 @@ fi
 # Export AWS_DEFAULT_REGION if set
 [ -n "$AWS_DEFAULT_REGION" ] && export AWS_DEFAULT_REGION
 
-echo "Downloading from S3..."
-eval aws s3 sync "s3://$bucket/$path" $dest $options
-echo "...done."
+# skip if upload only
+if [ $(echo "$payload" | jq -r '.source.upload_only') = true ]; then
+    echo "Skipping download..."
+else
+    echo "Downloading from S3..."
+    eval aws s3 sync "s3://$bucket/$path" $dest $options
+    echo "...done."
+fi
 
 source "$(dirname $0)/emit.sh" >&3
