@@ -22,6 +22,7 @@ resources:
     path: [<optional>, use to sync to a specific path of the bucket instead of root of bucket]
     options: [<optional, see note below>]
     region: <optional, see below>
+    upload_only: <optional, boolean>
 jobs:
 - name: <job name>
   plan:
