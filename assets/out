@@ -21,12 +21,6 @@ path=$(echo "$payload" | jq -r '.source.path // ""')
 options=$(echo "$payload" | jq -r '.source.options // [] | join(" ")')
 dir=$(echo "$payload" | jq -r '.source.dir')
 
-echo $source
-echo $bucket
-echo $path
-echo $options
-echo $dir
-
 # export for `aws` cli
 AWS_ACCESS_KEY_ID=$(echo "$payload" | jq -r '.source.access_key_id // empty')
 AWS_SECRET_ACCESS_KEY=$(echo "$payload" | jq -r '.source.secret_access_key // empty')
