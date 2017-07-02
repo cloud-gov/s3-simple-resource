@@ -7,6 +7,7 @@ exec 3>&1 # make stdout available as fd 3 for the result
 exec 1>&2 # redirect all output to stderr for logging
 
 source=$1
+ls -la
 
 if [ -z "$source" ]; then
   echo "usage: $0 </full/path/to/dir>"
@@ -19,6 +20,11 @@ payload=`cat`
 bucket=$(echo "$payload" | jq -r '.source.bucket')
 path=$(echo "$payload" | jq -r '.source.path // ""')
 options=$(echo "$payload" | jq -r '.source.options // [] | join(" ")')
+
+echo $source
+echo $bucket
+echo $path
+echo $options
 
 # export for `aws` cli
 AWS_ACCESS_KEY_ID=$(echo "$payload" | jq -r '.source.access_key_id // empty')
