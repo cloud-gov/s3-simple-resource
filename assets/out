@@ -40,4 +40,9 @@ echo "Uploading to S3 from '$dir'..."
 eval aws s3 sync $source/$dir "s3://$bucket/$path" $options
 echo "...done."
 
-source "$(dirname $0)/emit.sh" >&3
+timestamps=$(aws s3api list-objects --bucket $bucket --prefix "$path" --query 'Contents[].{LastModified: LastModified}')
+recent="$(echo $timestamps | jq -r 'max_by(.LastModified)')"
+
+echo "{
+  \"version\": {$recent}
+}" >&3
