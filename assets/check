@@ -4,6 +4,9 @@
 
 set -e
 
+exec 3>&1 # make stdout available as fd 3 for the result
+exec 1>&2 # redirect all output to stderr for logging
+
 # parse incoming config data
 payload=`cat`
 bucket=$(echo "$payload" | jq -r '.source.bucket')
@@ -26,4 +29,4 @@ fi
 # Consider the most recent LastModified timestamp as the most recent version.
 timestamps=$(aws s3api list-objects --bucket $bucket --prefix "$prefix" --query 'Contents[].{LastModified: LastModified}')
 recent="$(echo $timestamps | jq -r 'max_by(.LastModified)')"
-echo "[$recent]"
+echo "[$recent]" >&3
