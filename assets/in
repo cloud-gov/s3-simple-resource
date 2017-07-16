@@ -39,6 +39,8 @@ if [ "$skip_download" = "false" ]; then
   echo "Downloading from S3..."
   eval aws s3 sync "s3://$bucket/$path" $dest $options
   echo "...done."
+else 
+  echo "Skipping download..."
 fi
 
 timestamps=$(aws s3api list-objects --bucket $bucket --prefix "$path" --query 'Contents[].{LastModified: LastModified}')
