@@ -19,6 +19,7 @@ payload=`cat`
 bucket=$(echo "$payload" | jq -r '.source.bucket')
 path=$(echo "$payload" | jq -r '.source.path // ""')
 options=$(echo "$payload" | jq -r '.source.options // [] | join(" ")')
+skip_download="$(jq -r '.params.skip_download // false')"
 
 # export for `aws` cli
 AWS_ACCESS_KEY_ID=$(echo "$payload" | jq -r '.source.access_key_id // empty')
@@ -34,10 +35,11 @@ fi
 # Export AWS_DEFAULT_REGION if set
 [ -n "$AWS_DEFAULT_REGION" ] && export AWS_DEFAULT_REGION
 
-echo "Downloading from S3..."
-eval aws s3 sync "s3://$bucket/$path" $dest $options
-echo "...done."
-
+if [ "$skip_download" = "false" ]; then
+  echo "Downloading from S3..."
+  eval aws s3 sync "s3://$bucket/$path" $dest $options
+  echo "...done."
+fi
 
 timestamps=$(aws s3api list-objects --bucket $bucket --prefix "$path" --query 'Contents[].{LastModified: LastModified}')
 recent="$(echo $timestamps | jq -r 'max_by(.LastModified)')"
