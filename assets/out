@@ -44,5 +44,5 @@ timestamps=$(aws s3api list-objects --bucket $bucket --prefix "$path" --query 'C
 recent="$(echo $timestamps | jq -r 'max_by(.LastModified)')"
 
 jq -n "{
-  version: $(echo $recent | jq -R .) 
+  version: $recent
 }" >&3
