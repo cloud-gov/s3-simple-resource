@@ -18,7 +18,7 @@ fi
 payload=`cat`
 bucket=$(echo "$payload" | jq -r '.source.bucket')
 path=$(echo "$payload" | jq -r '.source.path // ""')
-options=$(echo "$payload" | jq -r '.source.options // [] | join(" ")')
+options=$(echo "$payload" | jq -r '.params.options // [] | join(" ")')
 dir=$(echo "$payload" | jq -r '.params.dir // "."')
 
 # export for `aws` cli
