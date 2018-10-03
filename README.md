@@ -22,6 +22,7 @@ resources:
     path: [<optional>, use to sync to a specific path of the bucket instead of root of bucket]
     options: [<optional, see note below>]
     region: <optional, see below>
+    sync: <optional, see below>
 jobs:
 - name: <job name>
   plan:
@@ -63,4 +64,11 @@ located (if this is set, AWS_DEFAULT_REGION env variable will be set accordingly
 
 ```yaml
 region: eu-west-2
+```
+
+### Sync
+By default files will be synced from s3. Disabling this will only upload new files.
+
+```yaml
+sync: false
 ```
