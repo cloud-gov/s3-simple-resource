@@ -19,6 +19,7 @@ payload=`cat`
 bucket=$(echo "$payload" | jq -r '.source.bucket')
 path=$(echo "$payload" | jq -r '.source.path // ""')
 options=$(echo "$payload" | jq -r '.source.options // [] | join(" ")')
+dosync=$(echo "$payload" | jq -r '.source.sync // "true"')
 
 # export for `aws` cli
 AWS_ACCESS_KEY_ID=$(echo "$payload" | jq -r '.source.access_key_id // empty')
@@ -34,8 +35,10 @@ fi
 # Export AWS_DEFAULT_REGION if set
 [ -n "$AWS_DEFAULT_REGION" ] && export AWS_DEFAULT_REGION
 
-echo "Downloading from S3..."
-eval aws s3 sync "s3://$bucket/$path" $dest $options
-echo "...done."
+if [ "$dosync" === "true" ]; then
+  echo "Downloading from S3..."
+  eval aws s3 sync "s3://$bucket/$path" $dest $options
+  echo "...done."
+fi
 
 source "$(dirname $0)/emit.sh" >&3
