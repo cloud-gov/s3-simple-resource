@@ -20,6 +20,7 @@ resources:
     secret_access_key: {{aws-secret-key}}
     bucket: {{aws-bucket}}
     path: [<optional>, use to sync to a specific path of the bucket instead of root of bucket]
+    omit_path_name: [<optional, see note below>]
     options: [<optional, see note below>]
     region: <optional, see below>
 jobs:
@@ -32,6 +33,29 @@ jobs:
 ## AWS Credentials
 
 The `access_key_id` and `secret_access_key` are optional and if not provided the EC2 Metadata service will be queried for role based credentials.
+
+## omit_path_name
+
+The `omit_path_name` flag lets you upload the contents of a directory without including the directory name as a prefix in your bucket.
+Given the following directory `test`:
+
+```
+test
+├── 1.json
+└── 2.json
+```
+and the config:
+```
+- name: test
+  type: s3-resource-simple
+  source:
+    omit_path_name: true
+    bucket: my-bucket
+    [...other settings...]
+```
+
+`put` will upload 1.json and 2.json to the root of the bucket. By contrast, with `omit_path_name` set to `false` (the default), 1.json and 2.json will be uploaded as `test/1.json` and `test/2.json`, respectively.
+This flag has no effect on `get` or `check`.
 
 ## Options
 
