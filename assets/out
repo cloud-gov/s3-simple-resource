@@ -35,7 +35,7 @@ fi
 # Export AWS_DEFAULT_REGION if set
 [ -n "$AWS_DEFAULT_REGION" ] && export AWS_DEFAULT_REGION
 
-cd ${source}/change_dir_to
+cd ${source}/${change_dir_to}
 
 echo "Uploading to S3..."
 eval aws s3 sync . "s3://$bucket/$path" $options
