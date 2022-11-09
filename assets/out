@@ -41,4 +41,4 @@ echo "Uploading to S3..."
 eval aws s3 sync . "s3://$bucket/$path" $options
 echo "...done."
 
-source "$(dirname $0)/emit.sh" >&3
+. "$(pwd)/emit.sh" >&3
