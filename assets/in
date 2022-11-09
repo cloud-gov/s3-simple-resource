@@ -38,4 +38,4 @@ echo "Downloading from S3..."
 eval aws s3 sync "s3://$bucket/$path" $dest $options
 echo "...done."
 
-. "$(pwd)/emit.sh" >&3
+. "$(dirname $0)/emit.sh" >&3
