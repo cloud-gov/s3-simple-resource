@@ -5,25 +5,31 @@
 set -e
 
 # parse incoming config data
-payload=`cat`
-bucket=$(echo "$payload" | jq -r '.source.bucket')
-prefix="$(echo "$payload" | jq -r '.source.path // ""')"
+eval "$(jq -r '.source | [
+  "bucket=\(.bucket | @sh)",
+  "path=\(.path // "" | @sh)",
+  "AWS_ACCESS_KEY_ID=\(.access_key_id // "" | @sh)",
+  "AWS_SECRET_ACCESS_KEY=\(.secret_access_key // "" | @sh)",
+  "AWS_DEFAULT_REGION=\(.region // "" | @sh)"
+] | join("\n")')"
 
-# export for `aws` cli
-AWS_ACCESS_KEY_ID=$(echo "$payload" | jq -r '.source.access_key_id // empty')
-AWS_SECRET_ACCESS_KEY=$(echo "$payload" | jq -r '.source.secret_access_key // empty')
-AWS_DEFAULT_REGION=$(echo "$payload" | jq -r '.source.region // empty')
+# hints for static checking
+: "${bucket:=}" "${path:=}" "${AWS_ACCESS_KEY_ID:=}" "${AWS_SECRET_ACCESS_KEY:=}" "${AWS_DEFAULT_REGION:=}"
 
 # Due to precedence rules, must be unset to support AWS IAM Roles.
 if [ -n "$AWS_ACCESS_KEY_ID" ] && [ -n "$AWS_SECRET_ACCESS_KEY" ]; then
-  export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-  export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+  export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY
 fi
 
 # Export AWS_DEFAULT_REGION if set
 [ -n "$AWS_DEFAULT_REGION" ] && export AWS_DEFAULT_REGION
 
 # Consider the most recent LastModified timestamp as the most recent version.
-timestamps=$(aws s3api list-objects --bucket $bucket --prefix "$prefix" --query 'Contents[].{LastModified: LastModified}')
-recent="$(echo $timestamps | jq -r 'max_by(.LastModified)')"
-echo "[$recent]"
+timestamps=$(aws s3api list-objects --bucket "$bucket" --prefix "$path" --query 'Contents[].{LastModified: LastModified}')
+if [ "$timestamps" != "null" ]; then
+  recent="$(printf '%s\n' "$timestamps" | jq -r 'max_by(.LastModified)')"
+else
+  recent=''
+fi
+
+printf '%s\n' "[$recent]"

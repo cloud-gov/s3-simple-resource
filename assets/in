@@ -15,27 +15,29 @@ fi
 #######################################
 
 # parse incoming config data
-payload=`cat`
-bucket=$(echo "$payload" | jq -r '.source.bucket')
-path=$(echo "$payload" | jq -r '.source.path // ""')
-options=$(echo "$payload" | jq -r '.source.options // [] | join(" ")')
+eval "$(jq -r '.source | [
+  "bucket=\(.bucket | @sh)",
+  "path=\(.path // "" | @sh)",
+  "options=\(.options // [] | join(" ") | @sh)",
+  "AWS_ACCESS_KEY_ID=\(.access_key_id // "" | @sh)",
+  "AWS_SECRET_ACCESS_KEY=\(.secret_access_key // "" | @sh)",
+  "AWS_DEFAULT_REGION=\(.region // "" | @sh)"
+] | join("\n")')"
 
-# export for `aws` cli
-AWS_ACCESS_KEY_ID=$(echo "$payload" | jq -r '.source.access_key_id // empty')
-AWS_SECRET_ACCESS_KEY=$(echo "$payload" | jq -r '.source.secret_access_key // empty')
-AWS_DEFAULT_REGION=$(echo "$payload" | jq -r '.source.region // empty')
+# hints for static checking
+: "${bucket:=}" "${path:=}" "${options:=}" "${AWS_ACCESS_KEY_ID:=}" "${AWS_SECRET_ACCESS_KEY:=}" "${AWS_DEFAULT_REGION:=}"
 
 # Due to precedence rules, must be unset to support AWS IAM Roles.
 if [ -n "$AWS_ACCESS_KEY_ID" ] && [ -n "$AWS_SECRET_ACCESS_KEY" ]; then
-  export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-  export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+  export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY
 fi
 
 # Export AWS_DEFAULT_REGION if set
 [ -n "$AWS_DEFAULT_REGION" ] && export AWS_DEFAULT_REGION
 
 echo "Downloading from S3..."
-eval aws s3 sync "s3://$bucket/$path" $dest $options
+eval "set -- $options" # transform options list into argument vector elements
+aws s3 sync "s3://$bucket/$path" "$dest" "$@"
 echo "...done."
 
-. "$(dirname $0)/emit.sh" >&3
+. "$(dirname "$0")/emit.sh" >&3
