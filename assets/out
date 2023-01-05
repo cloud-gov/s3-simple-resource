@@ -17,18 +17,14 @@ fi
 # disable trace since we're interacting with sensitive values
 set +x
 
-eval "$(jq -r '.source | [
-  "bucket=\(.bucket | @sh)",
-  "path=\(.path // "" | @sh)",
-  "change_dir_to=\(.change_dir_to // "." | @sh)",
-  "AWS_ACCESS_KEY_ID=\(.access_key_id // "" | @sh)",
-  "AWS_SECRET_ACCESS_KEY=\(.secret_access_key // "" | @sh)",
-  "AWS_DEFAULT_REGION=\(.region // "" | @sh)",
-  "options=\(.options // [] | join(" ") | @sh)"
-] | join("\n")')"
-
-# hints for static checking
-: "${bucket:=}" "${path:=}" "${change_dir_to:=}" "${options:=}" "${AWS_ACCESS_KEY_ID:=}" "${AWS_SECRET_ACCESS_KEY:=}" "${AWS_DEFAULT_REGION:=}"
+payload=$(cat)
+bucket=$(printf '%s\n' "$payload" | jq -r '.source.bucket // ""')
+path=$(printf '%s\n' "$payload" | jq -r '.source.path // ""')
+change_dir_to=$(printf '%s\n' "$payload" | jq -r '.source.change_dir_to // ""')
+options=$(printf '%s\n' "$payload" | jq -r '.source.options // [] | join(" ")')
+AWS_ACCESS_KEY_ID=$(printf '%s\n' "$payload" | jq -r '.source.access_key_id // ""')
+AWS_SECRET_ACCESS_KEY=$(printf '%s\n' "$payload" | jq -r '.source.secret_access_key // ""')
+AWS_DEFAULT_REGION=$(printf '%s\n' "$payload" | jq -r '.source.region // ""')
 
 # Due to precedence rules, must be unset to support AWS IAM Roles.
 if [ -n "$AWS_ACCESS_KEY_ID" ] && [ -n "$AWS_SECRET_ACCESS_KEY" ]; then
