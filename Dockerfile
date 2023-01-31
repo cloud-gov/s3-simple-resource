@@ -1,6 +1,6 @@
-FROM ubuntu:18.04
+FROM ubuntu:22.04
 
-RUN apt update && apt upgrade
+RUN apt update && apt upgrade -y
 RUN apt install python3 -y
 RUN apt install python3-pip -y
 RUN apt install wget -y
