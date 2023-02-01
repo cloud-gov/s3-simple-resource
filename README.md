@@ -57,6 +57,16 @@ and the config:
 `put` will upload 1.json and 2.json to the root of the bucket. By contrast, with `change_dir_to` set to `false` (the default), 1.json and 2.json will be uploaded as `test/1.json` and `test/2.json`, respectively.
 This flag has no effect on `get` or `check`.
 
+## skip_download
+Allows you to skip downloading the S3 bucket on the implict `get` when doing a `put` by 
+setting it as a [`get_params`](https://concourse-ci.org/put-step.html):
+
+```
+- put: my-s3-bucket
+  get_params:
+    skip_download: true
+```
+
 ## Options
 
 The `options` parameter is synonymous with the options that `aws cli` accepts for `sync`. Please see [S3 Sync Options](http://docs.aws.amazon.com/cli/latest/reference/s3/sync.html#options) and pay special attention to the [Use of Exclude and Include Filters](http://docs.aws.amazon.com/cli/latest/reference/s3/index.html#use-of-exclude-and-include-filters).
