@@ -11,5 +11,7 @@ RUN wget https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 \
 	&& chmod +x /usr/local/bin/jq
 RUN python3 -m pip install --upgrade pip
 RUN python3 -m pip install --upgrade awscli
+RUN python3 -m pip install --upgrade wheel
+RUN python3 -m pip install --upgrade setuptools
 
 ADD assets/ /opt/resource/
