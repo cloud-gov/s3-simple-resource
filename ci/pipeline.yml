@@ -31,5 +31,5 @@ resources:
   type: git
   source:
     uri: https://github.com/((src-repo))
-    branch: test-pr
+    branch: main
     commit_verification_keys: ((cloud-gov-pgp-keys))
