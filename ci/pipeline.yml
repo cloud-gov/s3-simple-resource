@@ -1,0 +1,35 @@
+---
+jobs:
+- name: bootstrap
+  plan:
+    # Get the repo containing the template pipeline we want.
+    - get: common-pipelines
+      trigger: true
+
+    # The container pipeline loads some vars from the concrete pipeline's
+    # repository, 'src'. Must get src here so they are available to
+    # set_pipeline below.
+    - get: src
+
+    # Overwrite this pipeline with the template in common-pipelines.
+    - set_pipeline: self
+      file: common-pipelines/container/pipeline.yml
+      var_files:
+        - src/ci/vars.yml
+
+resources:
+# The repository containing the pipeline you want to use.
+- name: common-pipelines
+  type: git
+  source:
+    uri: https://github.com/cloud-gov/common-pipelines
+    branch: main
+    commit_verification_keys: ((cloud-gov-pgp-keys))
+
+# Your repository. Set 'src-repo' in Credhub.
+- name: src
+  type: git
+  source:
+    uri: https://github.com/((src-repo))
+    branch: main
+    commit_verification_keys: ((cloud-gov-pgp-keys))

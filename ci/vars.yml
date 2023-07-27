@@ -1,0 +1,3 @@
+# All empty by default. See ../README.md#Usage for details.
+oci-build-params:
+  CONTEXT: src
