@@ -1,4 +1,6 @@
-FROM ubuntu:22.04
+ARG base_image
+
+FROM ${base_image}
 
 RUN apt update && apt upgrade -y
 RUN apt install python3 -y
