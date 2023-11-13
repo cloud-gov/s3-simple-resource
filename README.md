@@ -18,6 +18,7 @@ resources:
   source:
     access_key_id: {{aws-access-key}}
     secret_access_key: {{aws-secret-key}}
+    aws_role_arn: arn:aws:iam::{{s3_account_id}}:role/{{s3_user}}
     bucket: {{aws-bucket}}
     path: [<optional>, use to sync to a specific path of the bucket instead of root of bucket]
     change_dir_to: [<optional, see note below>]
@@ -32,7 +33,7 @@ jobs:
 
 ## AWS Credentials
 
-The `access_key_id` and `secret_access_key` are optional and if not provided the EC2 Metadata service will be queried for role based credentials.
+The `access_key_id`, `secret_access_key` and `aws_role_arn` are optional and if not provided the EC2 Metadata service will be queried for role based credentials.
 
 ## change_dir_to
 
