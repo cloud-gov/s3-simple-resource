@@ -2,7 +2,7 @@
 
 Resource to upload files to S3. Unlike the [the official S3 Resource](https://github.com/concourse/s3-resource), this Resource can upload or download multiple files.
 
-## Usage
+## Usage 
 
 Include the following in your Pipeline YAML file, replacing the values in the angle brackets (`< >`):
 
