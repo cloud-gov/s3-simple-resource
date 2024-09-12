@@ -8,6 +8,7 @@ set -e
 payload=`cat`
 bucket=$(echo "$payload" | jq -r '.source.bucket')
 prefix="$(echo "$payload" | jq -r '.source.path // ""')"
+role=$(echo "$payload" | jq -r '.source.aws_role_arn // empty')
 
 # export for `aws` cli
 AWS_ACCESS_KEY_ID=$(echo "$payload" | jq -r '.source.access_key_id // empty')
@@ -18,6 +19,15 @@ AWS_DEFAULT_REGION=$(echo "$payload" | jq -r '.source.region // empty')
 if [ -n "$AWS_ACCESS_KEY_ID" ] && [ -n "$AWS_SECRET_ACCESS_KEY" ]; then
   export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
   export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+  if [ -n "$role" ]; then
+    session_name=$(date +%s)
+    export $(printf "AWS_ACCESS_KEY_ID=%s AWS_SECRET_ACCESS_KEY=%s AWS_SESSION_TOKEN=%s" \
+    $(aws sts assume-role \
+    --role-arn $role \
+    --role-session-name $session_name \
+    --query "Credentials.[AccessKeyId,SecretAccessKey,SessionToken]" \
+    --output text))
+  fi
 fi
 
 # Export AWS_DEFAULT_REGION if set
