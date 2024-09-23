@@ -17,4 +17,6 @@ RUN python3 -m pip install --upgrade \
 	wheel \
 	setuptools
 
+ENV AWS_USE_FIPS_ENDPOINT true
+
 ADD assets/ /opt/resource/
