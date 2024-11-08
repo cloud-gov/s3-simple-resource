@@ -6,7 +6,7 @@ We want to ensure a welcoming environment for all of our projects. Our staff fol
 
 We encourage you to read this project's CONTRIBUTING policy (you are here), its [LICENSE](LICENSE.md), and its [README](README.md).
 
-If you have any questions or want to read more, check out the [18F Open Source Policy GitHub repository]( https://github.com/18f/open-source-policy), or just [shoot us an email](mailto:18f@gsa.gov).
+If you have any questions or want to read more, check out the [18F Open Source Policy GitHub repository](https://github.com/18f/open-source-policy), or just [shoot us an email](mailto:18f@gsa.gov).
 
 ## Development
 
@@ -14,14 +14,13 @@ Requires [Docker](https://www.docker.com/).
 
 1. Run `cp config.example.json config.json`.
 1. Modify `config.json`.
-  * See [the instructions for getting your AWS credentials](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-set-up.html#cli-signup).
-  * Exclude the `s3://` prefix/protocol for `bucket`.
+
+- See [the instructions for getting your AWS credentials](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-set-up.html#cli-signup).
+- Exclude the `s3://` prefix/protocol for `bucket`.
 
 1. Run `./test/out </full/path/to/dir>`.
 1. Run `./test/in </full/path/to/dir>`.
 1. Run `./test/check`.
-
-Every tag and branch created on this repository is automatically built on [Docker Hub](https://hub.docker.com/r/18fgsa/s3-resource-simple/).
 
 ## Public domain
 

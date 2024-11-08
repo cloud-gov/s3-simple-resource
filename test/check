@@ -9,5 +9,5 @@ source "$(dirname $0)/build.sh"
 echo $json | docker run \
   -i \
   --rm \
-  18fgsa/s3-resource-simple \
+  s3-resource-simple \
   /opt/resource/check

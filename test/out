@@ -17,5 +17,5 @@ echo $json | docker run \
   -i \
   --rm \
   -v $source:/tmp/input \
-  18fgsa/s3-resource-simple \
+  s3-resource-simple \
   /opt/resource/out /tmp/input

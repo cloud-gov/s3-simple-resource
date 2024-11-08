@@ -2,32 +2,40 @@
 
 Resource to upload files to S3. Unlike the [the official S3 Resource](https://github.com/concourse/s3-resource), this Resource can upload or download multiple files.
 
-## Usage 
+## Usage
 
 Include the following in your Pipeline YAML file, replacing the values in the angle brackets (`< >`):
 
 ```yaml
 resource_types:
-- name: <resource type name>
-  type: docker-image
-  source:
-    repository: 18fgsa/s3-resource-simple
+  - name: <resource type name>
+    type: registry-image
+    source:
+      aws_access_key_id: ((ecr_aws_key))
+      aws_secret_access_key: ((ecr_aws_secret))
+      repository: s3-resource-simple
+      aws_region: ((aws_region))
+      tag: ((tag))
 resources:
-- name: <resource name>
-  type: <resource type name>
-  source:
-    access_key_id: {{aws-access-key}}
-    secret_access_key: {{aws-secret-key}}
-    bucket: {{aws-bucket}}
-    path: [<optional>, use to sync to a specific path of the bucket instead of root of bucket]
-    change_dir_to: [<optional, see note below>]
-    options: [<optional, see note below>]
-    region: <optional, see below>
+  - name: <resource name>
+    type: <resource type name>
+    source:
+      access_key_id: { { aws-access-key } }
+      secret_access_key: { { aws-secret-key } }
+      bucket: { { aws-bucket } }
+      path:
+        [
+          <optional>,
+          use to sync to a specific path of the bucket instead of root of bucket,
+        ]
+      change_dir_to: [<optional, see note below>]
+      options: [<optional, see note below>]
+      region: <optional, see below>
 jobs:
-- name: <job name>
-  plan:
-  - <some Resource or Task that outputs files>
-  - put: <resource name>
+  - name: <job name>
+    plan:
+      - <some Resource or Task that outputs files>
+      - put: <resource name>
 ```
 
 ## AWS Credentials
@@ -44,7 +52,9 @@ test
 ├── 1.json
 └── 2.json
 ```
+
 and the config:
+
 ```
 - name: test
   type: s3-resource-simple
@@ -76,13 +86,13 @@ we can upload _only_ the `results` subdirectory by using the following `options`
 
 ```yaml
 options:
-- "--exclude '*'"
-- "--include 'results/*'"
+  - "--exclude '*'"
+  - "--include 'results/*'"
 ```
 
 ### Region
-Interacting with some AWS regions (like London) requires AWS Signature Version
-4. This options allows you to explicitly specify region where your bucket is
+
+Interacting with some AWS regions (like London) requires AWS Signature Version 4. This options allows you to explicitly specify region where your bucket is
 located (if this is set, AWS_DEFAULT_REGION env variable will be set accordingly).
 
 ```yaml
