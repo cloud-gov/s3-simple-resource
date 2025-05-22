@@ -1,33 +1,19 @@
-## Welcome!
+**Contribution Policy**
 
-We're so glad you're thinking about contributing to an 18F open source project! If you're unsure about anything, just ask -- or submit the issue or pull request anyway. The worst that can happen is you'll be politely asked to change something. We love all friendly contributions.
+Cloud.gov is an open source project operated by the U.S. General Services Administration (GSA) to support federal agency missions. While we value transparency and collaboration, we must balance openness with the responsibilities of operating a secure, compliant, and trusted federal platform.
 
-We want to ensure a welcoming environment for all of our projects. Our staff follow the [18F Code of Conduct](https://github.com/18F/code-of-conduct/blob/master/code-of-conduct.md) and all contributors should do the same.
+✅ **Who can contribute**
+We welcome contributions from:
 
-We encourage you to read this project's CONTRIBUTING policy (you are here), its [LICENSE](LICENSE.md), and its [README](README.md).
+- Employees of U.S. federal agencies
+- Contractors working under a current agreement with a U.S. government entity
+- GSA-approved contributors as part of official interagency collaboration
 
-If you have any questions or want to read more, check out the [18F Open Source Policy GitHub repository](https://github.com/18f/open-source-policy), or just [shoot us an email](mailto:18f@gsa.gov).
+❌ **Who we cannot accept contributions from**
+To avoid the appearance of government endorsement, manage supply chain risk, and maintain the integrity of our compliance posture, we do **not** accept unsolicited contributions from:
 
-## Development
+- Individuals unaffiliated with the U.S. government
+- International contributors or organizations
+- Unvetted accounts or first-time contributors submitting minor changes
 
-Requires [Docker](https://www.docker.com/).
-
-1. Run `cp config.example.json config.json`.
-1. Modify `config.json`.
-
-- See [the instructions for getting your AWS credentials](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-set-up.html#cli-signup).
-- Exclude the `s3://` prefix/protocol for `bucket`.
-
-1. Run `./test/out </full/path/to/dir>`.
-1. Run `./test/in </full/path/to/dir>`.
-1. Run `./test/check`.
-
-## Public domain
-
-This project is in the public domain within the United States, and
-copyright and related rights in the work worldwide are waived through
-the [CC0 1.0 Universal public domain dedication](https://creativecommons.org/publicdomain/zero/1.0/).
-
-All contributions to this project will be released under the CC0
-dedication. By submitting a pull request, you are agreeing to comply
-with this waiver of copyright interest.
+If you're unsure whether your contribution fits, feel free to open an issue first so we can discuss it.
