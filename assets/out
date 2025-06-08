@@ -16,22 +16,19 @@ fi
 
 # disable trace since we're interacting with sensitive values
 set +x
-# parse incoming config data
-payload=`cat`
-bucket=$(echo "$payload" | jq -r '.source.bucket')
-path=$(echo "$payload" | jq -r '.source.path // ""')
-options=$(echo "$payload" | jq -r '.source.options // [] | join(" ")')
-change_dir_to=$(echo "$payload" | jq -r '.source.change_dir_to // "." ')
 
-# export for `aws` cli
-AWS_ACCESS_KEY_ID=$(echo "$payload" | jq -r '.source.access_key_id // empty')
-AWS_SECRET_ACCESS_KEY=$(echo "$payload" | jq -r '.source.secret_access_key // empty')
-AWS_DEFAULT_REGION=$(echo "$payload" | jq -r '.source.region // empty')
+payload=$(cat)
+bucket=$(printf '%s\n' "$payload" | jq -r '.source.bucket // ""')
+path=$(printf '%s\n' "$payload" | jq -r '.source.path // ""')
+change_dir_to=$(printf '%s\n' "$payload" | jq -r '.source.change_dir_to // ""')
+options=$(printf '%s\n' "$payload" | jq -r '.source.options // [] | join(" ")')
+AWS_ACCESS_KEY_ID=$(printf '%s\n' "$payload" | jq -r '.source.access_key_id // ""')
+AWS_SECRET_ACCESS_KEY=$(printf '%s\n' "$payload" | jq -r '.source.secret_access_key // ""')
+AWS_DEFAULT_REGION=$(printf '%s\n' "$payload" | jq -r '.source.region // ""')
 
 # Due to precedence rules, must be unset to support AWS IAM Roles.
 if [ -n "$AWS_ACCESS_KEY_ID" ] && [ -n "$AWS_SECRET_ACCESS_KEY" ]; then
-  export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-  export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+  export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY
 fi
 
 # re-enable trace since we're done interacting with sensitive values
@@ -40,10 +37,11 @@ set -x
 # Export AWS_DEFAULT_REGION if set
 [ -n "$AWS_DEFAULT_REGION" ] && export AWS_DEFAULT_REGION
 
-cd ${source}/${change_dir_to}
+cd "${source}/${change_dir_to}"
 
 echo "Uploading to S3..."
-eval aws s3 sync . "s3://$bucket/$path" $options
+eval "set -- $options"
+aws s3 sync . "s3://$bucket/$path" "$@"
 echo "...done."
 
-. "$(dirname $0)/emit.sh" >&3
+. "$(dirname "$0")/emit.sh" >&3
