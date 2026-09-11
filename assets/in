@@ -6,6 +6,9 @@ set -e
 exec 3>&1 # make stdout available as fd 3 for the result
 exec 1>&2 # redirect all output to stderr for logging
 
+# Resolve our own directory up front so helper lookups do not depend on cwd.
+assets_dir="$(cd "$(dirname "$0")" && pwd)"
+
 dest=$1
 
 if [ -z "$dest" ]; then
@@ -32,10 +35,27 @@ if [ -n "$AWS_ACCESS_KEY_ID" ] && [ -n "$AWS_SECRET_ACCESS_KEY" ]; then
 fi
 
 # Export AWS_DEFAULT_REGION if set
-[ -n "$AWS_DEFAULT_REGION" ] && export AWS_DEFAULT_REGION
+if [ -n "$AWS_DEFAULT_REGION" ]; then
+  export AWS_DEFAULT_REGION
+fi
 
 echo "Downloading from S3..."
 eval aws s3 sync "s3://$bucket/$path" $dest $options
 echo "...done."
 
-. "$(dirname $0)/emit.sh" >&3
+# Echo back the version we were asked to fetch. Concourse rejects an empty
+# version (`{}`), and `get` must report the same version it was given so that
+# version history and `passed:` constraints line up.
+version="$(echo "$payload" | jq -c '.version // empty')"
+if [ -z "$version" ] || [ "$version" = "{}" ]; then
+  # Fetched without a version (e.g. a put-only resource, or the very first
+  # get): fall back to the bucket's current version.
+  recent="$("$assets_dir/version.sh" "$bucket" "$path")"
+  if [ -z "$recent" ]; then
+    echo "warning: no objects under s3://$bucket/$path; emitting a synthetic version" >&2
+    recent="$(jq -nc --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" '{LastModified: $ts}')"
+  fi
+  version="$recent"
+fi
+
+echo "$version" | jq -c '{version: .}' >&3

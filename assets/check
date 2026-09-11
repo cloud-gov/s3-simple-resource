@@ -4,6 +4,9 @@
 
 set -e
 
+# Resolve our own directory up front so helper lookups do not depend on cwd.
+assets_dir="$(cd "$(dirname "$0")" && pwd)"
+
 # parse incoming config data
 payload=`cat`
 bucket=$(echo "$payload" | jq -r '.source.bucket')
@@ -21,9 +24,16 @@ if [ -n "$AWS_ACCESS_KEY_ID" ] && [ -n "$AWS_SECRET_ACCESS_KEY" ]; then
 fi
 
 # Export AWS_DEFAULT_REGION if set
-[ -n "$AWS_DEFAULT_REGION" ] && export AWS_DEFAULT_REGION
+if [ -n "$AWS_DEFAULT_REGION" ]; then
+  export AWS_DEFAULT_REGION
+fi
 
-# Consider the most recent LastModified timestamp as the most recent version.
-timestamps=$(aws s3api list-objects --bucket $bucket --prefix "$prefix" --query 'Contents[].{LastModified: LastModified}')
-recent="$(echo $timestamps | jq -r 'max_by(.LastModified)')"
-echo "[$recent]"
+# Emit the current version, or an empty list when the bucket/prefix holds no
+# objects yet. An empty list is the correct `check` response for "no versions";
+# emitting `[{}]` would be rejected by Concourse >= 8.0.
+recent="$("$assets_dir/version.sh" "$bucket" "$prefix")"
+if [ -z "$recent" ]; then
+  echo "[]"
+else
+  echo "[$recent]"
+fi
