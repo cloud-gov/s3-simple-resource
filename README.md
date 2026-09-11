@@ -98,3 +98,52 @@ located (if this is set, AWS_DEFAULT_REGION env variable will be set accordingly
 ```yaml
 region: eu-west-2
 ```
+
+## Versions
+
+Concourse identifies each version of a resource with a non-empty map of string
+keys to string values. This resource uses the `LastModified` timestamp of the
+most recently modified object under `bucket`/`path`:
+
+```json
+{ "LastModified": "2026-09-10T12:34:56+00:00" }
+```
+
+`check`, `get` (`in`) and `put` (`out`) all report that same key:
+
+- `check` lists the current version, or an empty list (`[]`) when no objects
+  exist under the prefix yet.
+- `get` echoes back the version it was asked to fetch, falling back to the
+  current version of the bucket when invoked without one.
+- `put` reports the current version after the upload. If the upload produced no
+  objects at all — an empty input directory, or everything filtered out by
+  `options` — it logs a warning and reports a synthetic timestamp, because
+  Concourse requires every `put` to report a version.
+
+Because the version is derived from `LastModified`, two uploads that do not
+change any object under the prefix produce the same version, and Concourse will
+not record a new one. That is expected: nothing changed.
+
+> **Note for anyone upgrading from a build before this change:** earlier
+> versions of this resource emitted an empty version (`{}`) from `get` and
+> `put`. Concourse 8.0 and later reject that with
+> `resource output version is empty. Version must contain at least one key-value pair`
+> (see [concourse/concourse#9293](https://github.com/concourse/concourse/pull/9293)
+> and [concourse/concourse#9632](https://github.com/concourse/concourse/issues/9632)).
+> Before Concourse 8.2.5 the `put` step *silently succeeded* while dropping the
+> version, so pipelines using `passed:` constraints on this resource would stop
+> triggering with no visible error.
+
+## Tests
+
+`test/unit.sh` runs the resource scripts offline against a stubbed `aws` CLI —
+no credentials and no network access needed. It asserts the Concourse version
+contract (non-empty, string-valued, same key across `check`/`in`/`out`):
+
+```sh
+sh test/unit.sh
+```
+
+The scripts under `test/` named `check`, `in` and `out` are manual integration
+helpers: they build the image and run a single script against a real bucket
+using a local `config.json` (see `config.example.json`).

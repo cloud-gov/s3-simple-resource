@@ -6,6 +6,10 @@ set -ex
 exec 3>&1 # make stdout available as fd 3 for the result
 exec 1>&2 # redirect all output to stderr for logging
 
+# Resolve our own directory before any `cd`, so helper lookups survive being
+# invoked by a relative path.
+assets_dir="$(cd "$(dirname "$0")" && pwd)"
+
 source=$1
 
 if [ -z "$source" ]; then
@@ -38,7 +42,9 @@ fi
 set -x
 
 # Export AWS_DEFAULT_REGION if set
-[ -n "$AWS_DEFAULT_REGION" ] && export AWS_DEFAULT_REGION
+if [ -n "$AWS_DEFAULT_REGION" ]; then
+  export AWS_DEFAULT_REGION
+fi
 
 cd ${source}/${change_dir_to}
 
@@ -46,4 +52,15 @@ echo "Uploading to S3..."
 eval aws s3 sync . "s3://$bucket/$path" $options
 echo "...done."
 
-. "$(dirname $0)/emit.sh" >&3
+# Emit a non-empty version using the same key `check` uses. Concourse >= 8.0
+# rejects `{}` with "resource output version is empty. Version must contain at
+# least one key-value pair"; older versions accepted it silently.
+set +x
+recent="$("$assets_dir/version.sh" "$bucket" "$path")"
+if [ -z "$recent" ]; then
+  # `aws s3 sync` uploaded nothing (empty input dir, or everything filtered by
+  # `options`). We still must emit a version or the put step fails.
+  echo "warning: no objects under s3://$bucket/$path after sync; emitting a synthetic version" >&2
+  recent="$(jq -nc --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" '{LastModified: $ts}')"
+fi
+echo "$recent" | jq -c '{version: .}' >&3
